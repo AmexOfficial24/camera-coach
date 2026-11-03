@@ -1,0 +1,10 @@
+{
+  "name": "camera-coach",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Webex embedded app that coaches you on how you come across on camera",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/*.test.mjs"
+  }
+}
