@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Camera Coach</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <!-- Webex Embedded Apps SDK, pinned to a version we've tested -->
+  <script src="https://unpkg.com/@webex/embedded-app-sdk@2.8.0/dist/iife/bundle.min.js" defer></script>
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">🎥</span>
+        <div>
+          <h1>Camera Coach</h1>
+          <p class="greeting" id="greeting">Look your best on camera</p>
+        </div>
+      </div>
+      <button type="button" class="icon-button" id="open-settings" aria-label="Settings" aria-haspopup="dialog">⚙️</button>
+    </header>
+
+    <!-- One shared preview, shown while the camera is on -->
+    <section class="preview" id="preview" hidden>
+      <video id="video" playsinline muted></video>
+      <canvas id="mesh" aria-hidden="true"></canvas>
+      <span class="live-pill"><span class="dot"></span>Live</span>
+    </section>
+
+    <main>
+      <section class="screen" data-screen="start">
+        <h2>How do you come across on camera?</h2>
+        <p class="lead">Live tips on your eye contact, expression, framing, lighting and steadiness.</p>
+        <div class="actions">
+          <button type="button" class="primary" id="start-coaching">Start coaching</button>
+          <button type="button" class="secondary" id="start-check">Quick camera check (6 seconds)</button>
+        </div>
+        <p class="privacy">🔒 Your video never leaves this computer. Nothing is recorded, and only you see your tips.</p>
+        <div class="past" id="past-reports" hidden>
+          <h3>Your reports</h3>
+          <ul class="report-list" id="report-list"></ul>
+        </div>
+      </section>
+
+      <section class="screen center" data-screen="loading" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p id="loading-text" role="status">Starting your camera…</p>
+      </section>
+
+      <section class="screen" data-screen="coach" hidden>
+        <div class="score-row">
+          <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="ring-track" cx="60" cy="60" r="52" />
+            <circle class="ring-value" id="ring-value" cx="60" cy="60" r="52" />
+          </svg>
+          <div class="score-label">
+            <span class="score" id="score">–</span>
+            <span class="score-caption">Camera presence</span>
+          </div>
+        </div>
+        <div class="tip" id="tip" data-kind="none" role="status" aria-live="polite">
+          <span class="tip-icon" id="tip-icon" aria-hidden="true">👍</span>
+          <span id="tip-text">Getting ready…</span>
+        </div>
+        <ul class="categories" id="categories"></ul>
+        <div class="actions">
+          <button type="button" class="secondary" id="stop-coaching">End session</button>
+        </div>
+      </section>
+
+      <section class="screen center" data-screen="check" hidden>
+        <p class="check-title">Look at your camera and sit as you normally would…</p>
+        <div class="progress" aria-hidden="true"><div class="progress-fill" id="check-progress"></div></div>
+        <p class="muted" id="check-seconds" role="status">6 seconds left</p>
+      </section>
+
+      <section class="screen" data-screen="check-results" hidden>
+        <h2>Your camera check</h2>
+        <p class="lead" id="check-headline"></p>
+        <ul class="checklist" id="checklist"></ul>
+        <div class="actions">
+          <button type="button" class="primary" id="results-coach">Start coaching</button>
+          <button type="button" class="secondary" id="results-again">Check again</button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="report" hidden>
+        <p class="notice" id="report-notice" hidden>Here's your report from the session that just ended.</p>
+        <p class="eyebrow" id="report-when"></p>
+        <h2 id="report-title">Coaching session</h2>
+        <div class="report-hero">
+          <span class="score" id="report-score">–</span>
+          <span class="muted" id="report-verdict"></span>
+        </div>
+
+        <h3>Camera presence over time</h3>
+        <div class="chart-card" id="report-chart"></div>
+
+        <h3>By area</h3>
+        <ul class="categories" id="report-categories"></ul>
+
+        <div class="stats" id="report-stats"></div>
+
+        <div id="report-tips-section">
+          <h3>What to work on</h3>
+          <ul class="work-on" id="report-tips"></ul>
+        </div>
+
+        <details class="numbers">
+          <summary>Show the numbers</summary>
+          <table id="report-table"></table>
+        </details>
+
+        <h3>Export</h3>
+        <div class="export-row">
+          <button type="button" class="secondary" id="export-html">⬇️ Report (web page)</button>
+          <button type="button" class="secondary" id="export-csv">⬇️ Data (CSV)</button>
+          <button type="button" class="secondary" id="export-copy">📋 Copy summary</button>
+        </div>
+        <p class="muted small" id="export-status" role="status"></p>
+        <textarea class="copy-box" id="copy-box" rows="8" readonly hidden aria-label="Report summary to copy"></textarea>
+
+        <div class="actions">
+          <button type="button" class="primary" id="report-again">Start a new session</button>
+          <button type="button" class="secondary" id="report-home">Back to start</button>
+        </div>
+      </section>
+
+      <section class="screen center" data-screen="error" hidden>
+        <div class="hero" aria-hidden="true">⚠️</div>
+        <h2 id="error-title">Something went wrong</h2>
+        <p class="lead" id="error-text"></p>
+        <div class="actions">
+          <button type="button" class="primary" id="error-retry">Try again</button>
+        </div>
+      </section>
+    </main>
+
+    <pre class="debug" id="debug" hidden></pre>
+  </div>
+
+  <dialog class="settings" id="settings" aria-labelledby="settings-title">
+    <h2 id="settings-title">Settings</h2>
+    <label class="toggle">
+      <span>Show my video</span>
+      <input type="checkbox" id="setting-video" />
+    </label>
+    <p class="section-label">Testing</p>
+    <label class="toggle">
+      <span>Show face mesh</span>
+      <input type="checkbox" id="setting-mesh" />
+    </label>
+    <label class="toggle">
+      <span>Show measurements</span>
+      <input type="checkbox" id="setting-numbers" />
+    </label>
+    <p class="muted small">Testing options draw what the face tracker sees. Add <code>?debug=1</code> to the address to turn them on.</p>
+    <div class="actions">
+      <button type="button" class="primary" id="close-settings">Done</button>
+    </div>
+  </dialog>
+</body>
+</html>

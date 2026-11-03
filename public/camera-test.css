@@ -1,0 +1,74 @@
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --text: #1a1a1a;
+  --muted: #6b7280;
+  --border: #e2e4e8;
+  --accent: #0a5aff;
+  --ok: #1a7f37;
+  --bad: #cf222e;
+  --warn: #9a6700;
+}
+
+html[data-theme="DARK"] {
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --text: #f7f7f7;
+  --muted: #9aa0a6;
+  --border: #333333;
+  --accent: #4d8bff;
+  --ok: #3fb950;
+  --bad: #f85149;
+  --warn: #d29922;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.page { max-width: 760px; margin: 0 auto; padding: 20px; }
+h1 { margin: 0 0 4px; font-size: 1.5rem; }
+.subtitle { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; }
+
+.checks { display: grid; gap: 10px; }
+.check {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+}
+.check h2 { margin: 0 0 6px; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+.detail { margin: 0; color: var(--muted); font-size: 0.85rem; white-space: pre-line; }
+.live { margin: 8px 0 0; font-variant-numeric: tabular-nums; font-size: 0.9rem; }
+
+.badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 22px; border-radius: 999px; font-size: 0.8rem; font-weight: 700;
+  border: 1px solid var(--border); color: var(--muted);
+}
+.badge[data-state="ok"] { background: var(--ok); border-color: var(--ok); color: #fff; }
+.badge[data-state="bad"] { background: var(--bad); border-color: var(--bad); color: #fff; }
+.badge[data-state="warn"] { background: var(--warn); border-color: var(--warn); color: #fff; }
+
+.buttons { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+button {
+  background: var(--accent); color: #fff; border: none; border-radius: 8px;
+  padding: 7px 12px; font-size: 0.85rem; cursor: pointer;
+}
+button.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+button:disabled { opacity: 0.45; cursor: default; }
+
+/* Mirrored like a selfie camera; the overlay is mirrored the same way so the mesh lines up */
+.preview { position: relative; margin-top: 12px; border-radius: 10px; overflow: hidden; background: #000; }
+.preview video, .preview canvas { display: block; width: 100%; height: auto; transform: scaleX(-1); }
+.preview canvas { position: absolute; inset: 0; height: 100%; }
+
+.report { margin-top: 12px; }
+.report-header { display: flex; justify-content: space-between; align-items: center; }
+.report h2 { margin: 0; font-size: 1rem; }
+#report {
+  margin: 8px 0 0; padding: 10px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; font-size: 0.75rem; white-space: pre-wrap; word-break: break-word;
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="DARK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Camera Coach – camera test</title>
+  <link rel="stylesheet" href="./camera-test.css" />
+  <!-- Webex Embedded Apps SDK, pinned to a version we've tested -->
+  <script src="https://unpkg.com/@webex/embedded-app-sdk@2.8.0/dist/iife/bundle.min.js" defer></script>
+  <script type="module" src="./js/camera-test.js"></script>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>Camera Coach</h1>
+      <p class="subtitle">Camera test: checks whether this app can use your camera and face tracking inside Webex.
+        Your video stays on this computer.</p>
+    </header>
+
+    <section class="checks">
+      <article class="check" id="check-webex">
+        <h2><span class="badge" data-state="pending">…</span> 1. Webex</h2>
+        <p class="detail">Checking whether this page is running inside Webex…</p>
+      </article>
+
+      <article class="check" id="check-camera">
+        <h2><span class="badge" data-state="idle">–</span> 2. Camera</h2>
+        <p class="detail">Click <b>Start camera</b>. If asked, allow camera access.</p>
+        <div class="buttons">
+          <button type="button" id="camera-start">Start camera</button>
+          <button type="button" id="camera-stop" class="secondary" disabled>Stop camera</button>
+        </div>
+      </article>
+
+      <article class="check" id="check-tracking">
+        <h2><span class="badge" data-state="idle">–</span> 3. Face tracking</h2>
+        <p class="detail">Start the camera first, then click <b>Start face tracking</b>.</p>
+        <div class="buttons">
+          <button type="button" id="tracking-start" disabled>Start face tracking</button>
+        </div>
+        <p class="live" id="live-readout" hidden></p>
+      </article>
+    </section>
+
+    <section class="preview" id="preview" hidden>
+      <video id="video" playsinline muted></video>
+      <canvas id="overlay"></canvas>
+    </section>
+
+    <section class="report">
+      <div class="report-header">
+        <h2>Results</h2>
+        <button type="button" id="copy-report" class="secondary">Copy results</button>
+      </div>
+      <pre id="report"></pre>
+    </section>
+  </main>
+</body>
+</html>
