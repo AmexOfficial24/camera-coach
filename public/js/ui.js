@@ -1,6 +1,7 @@
 // Everything that changes what's on screen. No decisions are made here.
 import { CATEGORIES } from "./coach.js";
 import { CHART, chartPoints, chartSvg, formatClock, formatDate, formatDuration, verdict } from "./report.js";
+import { formatClock as clockSince, groupTurns, transcriptStart } from "./transcript.js";
 
 const $ = (id) => document.getElementById(id);
 const RING_LENGTH = 2 * Math.PI * 52;
@@ -152,6 +153,11 @@ export function renderReport(report, { justEnded = false } = {}) {
     return li;
   }));
 
+  const transcript = report.transcript || [];
+  $("report-transcript-section").hidden = transcript.length === 0;
+  $("export-transcript").hidden = transcript.length === 0;
+  renderTurns("report-transcript", groupTurns(transcript), report.startedAt);
+
   const table = $("report-table");
   table.replaceChildren();
   const head = table.insertRow();
@@ -162,6 +168,46 @@ export function renderReport(report, { justEnded = false } = {}) {
   }
   $("export-status").textContent = "";
   $("copy-box").hidden = true;
+}
+
+/* ---------- captions ---------- */
+
+// The transcript as speaker turns: who spoke, when (counted from `startAt`), and what they said.
+function renderTurns(listId, turns, startAt) {
+  const start = transcriptStart(turns, startAt);
+  $(listId).replaceChildren(...turns.map((turn) => {
+    const li = element("li");
+    const who = element("span", "who", turn.speaker);
+    const when = element("time", "", clockSince(turn.at - start));
+    li.append(who, when, element("p", "", turn.text));
+    return li;
+  }));
+}
+
+let shownTranscript = "";
+
+// view: from Captions.view(), or null when captions are off.
+export function renderCaptions(view, startedAt) {
+  $("captions").hidden = !view;
+  if (!view) return;
+  $("captions-status").textContent = view.detail;
+  // Microphone level on a decibel scale: -60 dB (silence) to 0 dB (as loud as it gets).
+  const db = 20 * Math.log10(view.level || 1e-6);
+  $("mic-level").style.width = Math.max(0, Math.min(100, ((db + 60) / 60) * 100)) + "%";
+
+  $("caption-lines").replaceChildren(...view.lines.map((line) => {
+    const li = element("li");
+    li.dataset.final = String(line.final);
+    li.append(element("span", "who", line.speaker), element("span", "said", line.text));
+    return li;
+  }));
+
+  // The full transcript only changes when a line is finished, so only rebuild it then.
+  const signature = view.count + ":" + (view.turns.length ? view.turns[view.turns.length - 1].text : "");
+  if (signature === shownTranscript) return;
+  shownTranscript = signature;
+  $("transcript-summary").textContent = "Meeting transcript (" + view.count + (view.count === 1 ? " line)" : " lines)");
+  renderTurns("transcript-turns", view.turns, startedAt);
 }
 
 // Hovering the chart shows a crosshair and the score at that moment.

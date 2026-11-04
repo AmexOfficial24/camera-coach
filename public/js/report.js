@@ -1,6 +1,7 @@
 // The session report: built from the coach's summary, drawn as a chart, and exported as
 // a standalone web page, a CSV file or plain text. Pure functions, so they're unit-tested.
 import { CATEGORIES } from "./coach.js";
+import { formatClock as clockSince, groupTurns, transcriptStart, transcriptToText } from "./transcript.js";
 
 export function buildReport(summary, meta) {
   return {
@@ -10,8 +11,16 @@ export function buildReport(summary, meta) {
     finished: Boolean(meta.finished),
     place: meta.place || "browser",         // "meeting", "space" or "browser"
     meetingTitle: meta.meetingTitle || null,
+    transcript: meta.transcript || [],      // [{ speaker, text, at }] when captions were on
     ...summary,
   };
+}
+
+// "[00:01:23] Name: text", one line each, timed from the start of the session.
+export function reportToTranscriptText(report) {
+  const heading = "Meeting transcript, " + formatDate(report.startedAt) +
+    (report.meetingTitle ? " · " + report.meetingTitle : "");
+  return heading + "\n\n" + transcriptToText(report.transcript || [], report.startedAt) + "\n";
 }
 
 export function verdict(score) {
@@ -122,6 +131,8 @@ const csvCell = (value) => {
 };
 
 export function reportToCsv(report) {
+  const transcript = report.transcript || [];
+  const start = transcriptStart(transcript, report.startedAt);
   const rows = [
     ["section", "name", "value"],
     ["summary", "started", new Date(report.startedAt).toISOString()],
@@ -135,6 +146,7 @@ export function reportToCsv(report) {
     ...CATEGORIES.map((c) => ["category", c.label, report.categories[c.id]]),
     ...report.tips.map((t) => ["tip", t.text, t.count]),
     ...report.timeline.map((p) => ["timeline_seconds", p.s, p.score]),
+    ...transcript.map((l) => ["transcript", clockSince(l.at - start) + " " + l.speaker, l.text]),
   ];
   return rows.map((row) => row.map(csvCell).join(",")).join("\n") + "\n";
 }
@@ -148,6 +160,11 @@ export function reportToHtml(report) {
   };
   const tips = report.tips.slice(0, 3).map((t) =>
     "<li>" + t.icon + " " + escapeHtml(t.text) + ' <span class="muted">(' + t.count + (t.count === 1 ? " time" : " times") + ")</span></li>"
+  ).join("");
+  const transcriptFrom = transcriptStart(report.transcript || [], report.startedAt);
+  const turns = groupTurns(report.transcript || []).map((turn) =>
+    '<p class="turn"><b>' + escapeHtml(turn.speaker) + '</b> <span class="muted">' + clockSince(turn.at - transcriptFrom) +
+    "</span><br>" + escapeHtml(turn.text) + "</p>"
   ).join("");
 
   return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
@@ -164,6 +181,7 @@ export function reportToHtml(report) {
     ".chart{width:100%;height:auto}.chart-grid{stroke:#eef1f4;stroke-width:1}.chart-axis{fill:#5f6b77;font-size:9px}" +
     ".chart-area{fill:#0077c8;opacity:.1}.chart-line{fill:none;stroke:#0077c8;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}" +
     ".chart-dot{fill:#0077c8;stroke:#fff;stroke-width:2}.chart-value{fill:#15191e;font-size:10px;font-weight:700}" +
+    ".turn{margin:0 0 10px}.turn:last-child{margin:0}" +
     "@media print{body{background:#fff}.card{border-color:#ccc}}" +
     '</style></head><body><main class="page">' +
     '<p class="muted">Camera Coach report</p>' +
@@ -178,13 +196,14 @@ export function reportToHtml(report) {
       '<div class="card stat"><b>' + report.smilingShare + '%</b><span class="muted">Smiling</span></div>' +
       '<div class="card stat"><b>' + report.inViewShare + '%</b><span class="muted">In view</span></div></div>' +
     (tips ? "<h2>What to work on</h2><div class=\"card\"><ul>" + tips + "</ul></div>" : "") +
-    '<p class="muted" style="margin-top:24px;font-size:.8rem">Made by Camera Coach. Your video was analysed on your own computer and never recorded or uploaded.</p>' +
+    (turns ? "<h2>Meeting transcript</h2><div class=\"card\">" + turns + "</div>" : "") +
+    '<p class="muted" style="margin-top:24px;font-size:.8rem">Made by Camera Coach. Your video and audio were analysed on your own computer and never recorded or uploaded.</p>' +
     "</main></body></html>";
 }
 
-export function reportFileName(report, extension) {
+export function reportFileName(report, extension, kind = "report") {
   const d = new Date(report.startedAt);
   const pad = (n) => String(n).padStart(2, "0");
-  return "camera-coach-report-" + d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) +
+  return "camera-coach-" + kind + "-" + d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) +
     "-" + pad(d.getHours()) + pad(d.getMinutes()) + "." + extension;
 }

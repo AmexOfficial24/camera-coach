@@ -51,4 +51,23 @@ export const CONFIG = {
     praiseShowMs: 4000,
   },
   check: { durationMs: 6000 },
+
+  // Captions: your own microphone, turned into text on this computer.
+  speech: {
+    // Measured: Moonshine tiny on the processor took 0.6 s for 5 s of speech (28 MB download);
+    // on the graphics card it took 2.9 s (79 MB). The processor also leaves the graphics card
+    // to face tracking. Add ?gpu to the address to try the graphics card anyway.
+    useGraphicsCard: false,
+    sampleRate: 16000,       // what the speech model expects
+    startMs: 120,            // this much speech starts a phrase
+    hangoverMs: 700,         // this much silence ends it
+    prerollMs: 250,          // keep a little audio from just before the speech started
+    maxPhraseMs: 8000,       // long speech is cut into 8-second captions
+    minSpeechMs: 300,        // shorter than this (a cough, a click) is ignored
+    interimEveryMs: 1500,    // how often the live caption updates while you speak
+    minLevel: 0.008,         // quietest sound (RMS) that can count as speech
+    noiseMultiplier: 3,      // speech must be this much louder than the background
+    lipMovementMin: 0.012,   // average jaw movement per face check that counts as talking
+    captionLines: 3,         // lines shown in the live captions
+  },
 };
