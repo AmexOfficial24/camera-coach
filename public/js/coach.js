@@ -1,5 +1,5 @@
 // The coach: turns a stream of face measurements into scores and one tip at a time.
-// It's deliberately calm: a problem has to last a couple of seconds before it's mentioned,
+// So it doesn't nag, a problem has to last a couple of seconds before it's mentioned,
 // fixed tips get a "That's better", and tips that keep coming back are rested.
 import { CONFIG } from "./config.js";
 import { clamp, isLookingAtCamera } from "./analysis.js";

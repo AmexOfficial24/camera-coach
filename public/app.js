@@ -1,10 +1,8 @@
 /*
- * Camera Coach — Webex Embedded App
- *   js/analysis.js — measurements from each video frame
- *   js/coach.js    — scores, and one calm tip at a time
- *   js/tracker.js  — MediaPipe face tracking
- *   js/camera.js, js/webex.js, js/settings.js, js/ui.js — camera, Webex, settings, screen
- * This file wires them together and runs the frame loop. Video never leaves the browser.
+ * Camera Coach main file. Starts the camera and face tracking, runs the frame loop and
+ * switches between screens. Most of the logic lives in js/: analysis.js works out the
+ * measurements, coach.js turns them into scores and tips, report.js builds the report.
+ * Video never leaves the browser.
  */
 import { CONFIG } from "./js/config.js";
 import { faceMetrics, measureLighting } from "./js/analysis.js";
