@@ -1,10 +1,9 @@
 /*
- * Camera Coach — camera test
- * Answers three questions before we build the real app:
- *   1) Webex         — is this page running inside Webex, and where (meeting or space)?
- *   2) Camera        — can an embedded app turn on the camera?
- *   3) Face tracking — does MediaPipe Face Landmarker load and run in Webex's browser?
- * Everything runs in the browser; no video is sent anywhere.
+ * Camera test page. We made this before the real app to check three things:
+ *   1. Is the page running inside Webex, and in a meeting or a space?
+ *   2. Can an embedded app turn on the camera?
+ *   3. Does MediaPipe Face Landmarker load and run in Webex's browser?
+ * Everything runs in the browser and no video is sent anywhere.
  */
 
 const MEDIAPIPE_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21";
