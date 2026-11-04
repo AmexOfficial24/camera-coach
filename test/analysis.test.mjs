@@ -67,3 +67,12 @@ test("lighting compares the middle of the face with the background", () => {
   assert.ok(light.face < 0.2);
   assert.ok(light.background > 0.85);
 });
+
+test("lip movement tells talking from a still mouth, and says when it can't tell", async () => {
+  const { lipMovement } = await import("../public/js/analysis.js");
+  const talking = Array.from({ length: 30 }, (_, i) => ({ t: i * 66, mouthOpen: i % 2 ? 0.25 : 0.05 }));
+  const still = Array.from({ length: 30 }, (_, i) => ({ t: i * 66, mouthOpen: 0.02 + (i % 2) * 0.002 }));
+  assert.ok(lipMovement(talking, 0, 2000) > 0.1);
+  assert.ok(lipMovement(still, 0, 2000) < 0.01);
+  assert.equal(lipMovement(talking, 5000, 6000), null, "no face samples then");
+});

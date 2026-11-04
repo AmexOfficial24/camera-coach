@@ -65,6 +65,10 @@ button:disabled { opacity: 0.45; cursor: default; }
 .preview video, .preview canvas { display: block; width: 100%; height: auto; transform: scaleX(-1); }
 .preview canvas { position: absolute; inset: 0; height: 100%; }
 
+/* Microphone level (speech test) */
+.meter { height: 8px; margin-top: 10px; border-radius: 999px; background: var(--border); overflow: hidden; }
+.meter-fill { height: 100%; width: 0; background: var(--ok); transition: width 0.08s linear; }
+
 .report { margin-top: 12px; }
 .report-header { display: flex; justify-content: space-between; align-items: center; }
 .report h2 { margin: 0; font-size: 1rem; }

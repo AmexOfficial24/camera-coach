@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildReport, chartPoints, chartSvg, formatClock, formatDuration, reportToCsv, reportToHtml, reportToText, verdict } from "../public/js/report.js";
+import { buildReport, chartPoints, chartSvg, formatClock, formatDuration, reportToCsv, reportToHtml, reportToText, reportToTranscriptText, verdict } from "../public/js/report.js";
 
 const summary = {
   durationMs: 754000,
@@ -59,4 +59,30 @@ test("the exported page is self-contained and escapes the meeting title", () => 
   assert.match(html, /Weekly &lt;sync&gt;/);
   assert.doesNotMatch(html, /<script/);
   assert.doesNotMatch(html, /src="http/);
+});
+
+test("with captions on, the transcript is in the report and every export, labelled with who spoke", () => {
+  const start = Date.UTC(2026, 10, 3, 13, 20);
+  const withTranscript = buildReport(summary, {
+    startedAt: start, finished: true,
+    transcript: [
+      { speaker: "Alex", text: "Morning everyone.", at: start + 12000 },
+      { speaker: "Alex", text: "Quick update first.", at: start + 15000 },
+      { speaker: "Sam <QA>", text: "Thanks, Alex.", at: start + 83000 },
+    ],
+  });
+  const text = reportToTranscriptText(withTranscript);
+  assert.match(text, /\[00:00:12\] Alex: Morning everyone\./);
+  assert.match(text, /\[00:01:23\] Sam <QA>: Thanks, Alex\./);
+
+  const html = reportToHtml(withTranscript);
+  assert.match(html, /Meeting transcript/);
+  assert.match(html, /<b>Alex<\/b>[^]*Morning everyone\. Quick update first\./, "one turn for Alex's two lines");
+  assert.match(html, /Sam &lt;QA&gt;/, "names are escaped");
+
+  const csv = reportToCsv(withTranscript);
+  assert.ok(csv.includes('transcript,00:01:23 Sam <QA>,"Thanks, Alex."'));
+
+  assert.doesNotMatch(reportToHtml(report), /Meeting transcript/, "no transcript section without captions");
+  assert.deepEqual(report.transcript, []);
 });

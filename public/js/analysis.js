@@ -72,7 +72,19 @@ export function faceMetrics(result) {
     gazeSideways: Math.max(score("eyeLookOutLeft"), score("eyeLookInLeft"), score("eyeLookOutRight"), score("eyeLookInRight")),
     gazeDown: Math.max(score("eyeLookDownLeft"), score("eyeLookDownRight")),
     blink: (score("eyeBlinkLeft") + score("eyeBlinkRight")) / 2,
+    mouthOpen: score("jawOpen"),
   };
+}
+
+// How much your jaw moved between `from` and `to` (average change per face check), from
+// samples of { t, mouthOpen }. Captions use it to tell your voice from other people's voices
+// coming out of your speakers. null if your face wasn't tracked then, so we can't tell.
+export function lipMovement(samples, from, to) {
+  const window = samples.filter((s) => s.t >= from && s.t <= to);
+  if (window.length < 5) return null;
+  let total = 0;
+  for (let i = 1; i < window.length; i++) total += Math.abs(window[i].mouthOpen - window[i - 1].mouthOpen);
+  return total / (window.length - 1);
 }
 
 export function isLookingAtCamera(m, limits = CONFIG.eyeContact) {

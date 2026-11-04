@@ -1,6 +1,8 @@
 // User settings, remembered in this browser. ?debug=1 in the address turns on the testing views.
 const KEY = "cameraCoach.settings";
-const DEFAULTS = { showVideo: true, showMesh: false, showNumbers: false };
+// captions: live captions and the meeting transcript (off until you choose them: they use the mic)
+// name: your name on captions when the app isn't inside Webex
+const DEFAULTS = { showVideo: true, showMesh: false, showNumbers: false, captions: false, name: "" };
 
 export function loadSettings() {
   let saved = {};

@@ -37,7 +37,15 @@
           <button type="button" class="primary" id="start-coaching">Start coaching</button>
           <button type="button" class="secondary" id="start-check">Quick camera check (6 seconds)</button>
         </div>
-        <p class="privacy">🔒 Your video never leaves this computer. Nothing is recorded, and only you see your tips.</p>
+        <label class="option">
+          <input type="checkbox" id="captions-toggle" />
+          <span>
+            <b>Live captions and meeting transcript</b>
+            <span class="muted small">Uses your microphone. Speech is turned into text on this computer, and only the
+              text is shared, with others in this meeting who use Camera Coach. Each line shows who said it.</span>
+          </span>
+        </label>
+        <p class="privacy">🔒 Your video and audio never leave this computer. Nothing is recorded, and only you see your tips.</p>
         <div class="past" id="past-reports" hidden>
           <h3>Your reports</h3>
           <ul class="report-list" id="report-list"></ul>
@@ -64,6 +72,18 @@
           <span class="tip-icon" id="tip-icon" aria-hidden="true">👍</span>
           <span id="tip-text">Getting ready…</span>
         </div>
+        <section class="captions" id="captions" hidden aria-label="Live captions">
+          <div class="captions-head">
+            <span class="captions-title">🎙️ Captions</span>
+            <span class="mic-meter" aria-hidden="true"><span id="mic-level"></span></span>
+          </div>
+          <p class="muted small" id="captions-status" role="status">Starting…</p>
+          <ol class="caption-lines" id="caption-lines" aria-live="polite"></ol>
+          <details class="transcript-box">
+            <summary id="transcript-summary">Meeting transcript</summary>
+            <ol class="turns" id="transcript-turns"></ol>
+          </details>
+        </section>
         <ul class="categories" id="categories"></ul>
         <div class="actions">
           <button type="button" class="secondary" id="stop-coaching">End session</button>
@@ -108,6 +128,11 @@
           <ul class="work-on" id="report-tips"></ul>
         </div>
 
+        <div id="report-transcript-section" hidden>
+          <h3>Meeting transcript</h3>
+          <ol class="turns" id="report-transcript"></ol>
+        </div>
+
         <details class="numbers">
           <summary>Show the numbers</summary>
           <table id="report-table"></table>
@@ -117,6 +142,7 @@
         <div class="export-row">
           <button type="button" class="secondary" id="export-html">⬇️ Report (web page)</button>
           <button type="button" class="secondary" id="export-csv">⬇️ Data (CSV)</button>
+          <button type="button" class="secondary" id="export-transcript" hidden>⬇️ Transcript (text)</button>
           <button type="button" class="secondary" id="export-copy">📋 Copy summary</button>
         </div>
         <p class="muted small" id="export-status" role="status"></p>
@@ -147,6 +173,11 @@
       <span>Show my video</span>
       <input type="checkbox" id="setting-video" />
     </label>
+    <label class="toggle field">
+      <span>Your name on captions</span>
+      <input type="text" id="setting-name" maxlength="80" placeholder="Guest" autocomplete="name" />
+    </label>
+    <p class="muted small">Inside Webex, your Webex name is used instead.</p>
     <p class="section-label">Testing</p>
     <label class="toggle">
       <span>Show face mesh</span>
