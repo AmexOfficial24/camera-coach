@@ -14,16 +14,39 @@ const PROBLEMS = {
   },
 };
 
+const SIZE = { width: { ideal: 640 }, height: { ideal: 480 } };
+
+// Windows only lets one app use a webcam at a time, so the default camera is often
+// busy with the Webex meeting video. If it is, try the other cameras, for example
+// an OBS Virtual Camera that shares the webcam with Webex.
+async function getCameraStream() {
+  try {
+    return await navigator.mediaDevices.getUserMedia({ video: { ...SIZE, facingMode: "user" }, audio: false });
+  } catch (error) {
+    if (error.name !== "NotReadableError" && error.name !== "AbortError") throw error;
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    for (const device of devices) {
+      if (device.kind !== "videoinput" || !device.deviceId) continue;
+      try {
+        return await navigator.mediaDevices.getUserMedia({
+          video: { ...SIZE, deviceId: { exact: device.deviceId } },
+          audio: false,
+        });
+      } catch {
+        // This one is busy too, so try the next one.
+      }
+    }
+    throw error;
+  }
+}
+
 export async function openCamera(video) {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     const error = new Error("Camera API not available");
     error.name = "NoCameraApi";
     throw error;
   }
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
-    audio: false,
-  });
+  const stream = await getCameraStream();
   video.srcObject = stream;
   await video.play();
   return stream;
